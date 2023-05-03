@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    env_file: .env
+
+  db-migrations:
+    image: db-migrations:latest
+    container_name: migrations
+    build: { context: ./migrations/ }
+    restart: on-failure
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=${DATABASE_URL_INTERNAL}
+    env_file: .env
+
+  server:
+    build: .
+    image: server:latest
+    restart: always
+    ports:
+      - "${SERVER_PORT}:8080"
+    depends_on:
+      - db
+      - db-migrations
+    environment:
+      - DATABASE_URL=${DATABASE_URL_INTERNAL}
+    env_file: .env
+
+volumes:
+  postgres_data:
