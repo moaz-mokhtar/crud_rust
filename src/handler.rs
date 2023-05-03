@@ -1,21 +1,26 @@
-use actix_web::{ web::{ ServiceConfig, self }, Responder, HttpResponse, Error };
+use actix_web::{
+    web::{self, ServiceConfig},
+    Error, HttpResponse, Responder,
+};
 use log::info;
+use uuid::Uuid;
 
-use crate::{ models::{ DefaultResponse, NewDriverRequest }, db::DbPool };
+use crate::{
+    db::DbPool,
+    models::{DefaultResponse, Driver, NewDriverRequest},
+};
 
 pub fn routes_config(config: &mut ServiceConfig) {
     config.service(
-        web
-            ::scope("/v1")
+        web::scope("/api")
             .service(web::resource("/").route(web::get().to(health)))
             .service(
-                web
-                    ::scope("/drivers")
-                    .route("/{driverid}", web::get().to(get_driver))
-                    .route("", web::get().to(get_all))
+                web::scope("/drivers")
                     .route("", web::post().to(new_driver))
-                    .route("/{driverid}", web::delete().to(delete_driver))
-            )
+                    .route("", web::get().to(get_all))
+                    .route("/{driverid}", web::get().to(get_driver))
+                    .route("/{driverid}", web::delete().to(delete_driver)),
+            ),
     );
 }
 
@@ -30,7 +35,7 @@ pub async fn health() -> impl Responder {
 
 pub async fn get_driver(
     path: web::Path<i32>,
-    _pool: web::Data<DbPool>
+    _pool: web::Data<DbPool>,
 ) -> Result<HttpResponse, Error> {
     let driver_id: i32 = path.into_inner();
     info!("Get driver: {}", driver_id);
@@ -38,32 +43,40 @@ pub async fn get_driver(
     todo!("get_driver")
 }
 
-pub async fn get_all(_pool: web::Data<DbPool>) -> Result<HttpResponse, Error> {
+pub async fn get_all(pool: web::Data<DbPool>) -> Result<HttpResponse, Error> {
     info!("Get all drivers");
 
-    todo!("get_all")
-
-    // match Uploadeddriver::get_all(&pool).await {
-    //     Ok(drivers) => Ok(HttpResponse::Ok().json(drivers)),
-    //     Err(e) => Ok(HttpResponse::NotFound().json(e.to_string())),
-    // }
+    match Driver::get_all(&pool).await {
+        Ok(drivers) => Ok(HttpResponse::Ok().json(drivers)),
+        Err(e) => Ok(HttpResponse::NotFound().json(e.to_string())),
+    }
 }
 
 pub async fn new_driver(
-    _data: web::Json<NewDriverRequest>,
-    _pool: web::Data<DbPool>
+    data: web::Json<NewDriverRequest>,
+    pool: web::Data<DbPool>,
 ) -> Result<HttpResponse, Error> {
-    info!("New driver");
+    info!("New driver: {:?}", data.0.clone());
 
-    todo!("new_driver")
+    match Driver::insert(data.0, &pool).await {
+        Ok(new_driver) => Ok(HttpResponse::Ok().json(new_driver)),
+        Err(e) => Ok(HttpResponse::BadRequest().json(DefaultResponse {
+            description: e.to_string(),
+        })),
+    }
 }
 
 pub async fn delete_driver(
-    path: web::Path<i32>,
-    _pool: web::Data<DbPool>
+    path: web::Path<Uuid>,
+    pool: web::Data<DbPool>,
 ) -> Result<HttpResponse, Error> {
-    let driver_id: i32 = path.into_inner();
+    let driver_id: Uuid = path.into_inner();
     info!("Delete driver: {}", driver_id);
 
-    todo!("delete_driver")
+    match Driver::delete(driver_id, &pool).await {
+        Ok(_) => Ok(HttpResponse::Ok().json(DefaultResponse {
+            description: "Driver deleted".to_string(),
+        })),
+        Err(e) => Ok(HttpResponse::NotFound().json(e.to_string())),
+    }
 }
