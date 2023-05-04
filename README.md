@@ -86,26 +86,32 @@ diesel database reset  --database-url postgres://username:password@localhost:543
 
 ## REST APIs
 
-There are 5 endpoints as below:
-
 ```bash
 # Health check
-curl -X GET http://localhost:$PORT/api/
+curl -X GET http://localhost:8080/api/
 
 # Create new driver
 curl -X POST \
     -H "Content-Type: application/json" \
     -d '{"first_name": "Moaz","last_name": "Mokhtar", "email": "moaz.mokhtar@gmail.com", "phone": "0154864354"}' \
-    http://localhost:$PORT/api/drivers
+    http://localhost:8080/api/drivers
 
 # Get all drivers
-curl -X GET http://localhost:$PORT/api/drivers
+curl -X GET http://localhost:8080/api/drivers
 
 # Get a driver
-curl -X GET http://localhost:$PORT/api/drivers/<DRIVER_UUID>
+curl -X GET http://localhost:8080/api/drivers/<DRIVER_UUID>
 
 # Delete a driver
-curl -X DELETE http://localhost:$PORT/api/drivers/<DRIVER_UUID>
+curl -X DELETE http://localhost:8080/api/drivers/<DRIVER_UUID>
 
+# Get list of randomly generated 100 dirivers
+curl -X GET http://localhost:8080/api/drivers/rand100
+
+# Get list of drivers sorted by name
+curl -X GET http://localhost:8080/api/drivers/all_by_name
+
+# Get list of drivers sorted by name's charaters
+curl -X GET http://localhost:8080/api/drivers/all_by_char
 
 ```

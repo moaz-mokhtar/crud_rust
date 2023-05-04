@@ -1,5 +1,3 @@
-use std::collections::BTreeSet;
-
 use crate::{
     db::DbClient,
     engine::sort_name_by_char,
