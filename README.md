@@ -18,13 +18,19 @@ Technologies are as below:
 To run the project you need to have Docker, then run below:
 
 ```bash
-docker compose up 
+# Run in from docker
+docker compose up server
+
+# Run curl commands to test apis
+sh curl_apis.sh
 ```
 
 To run tests, preferred to run them consecutively
 
 ```bash
-cargo test -- --test-threads=1
+# Run tests from docker
+docker compose up test_server
+
 ```
 
 ### prerequisites
@@ -38,7 +44,7 @@ cargo test -- --test-threads=1
 - Run database in docker
 
 ```bash
-docker compose up db
+docker compose up db test_db
 ```
 
 - install `diesel` and database 
@@ -59,6 +65,9 @@ diesel migration run
 ```bash
 # Make sure that Postgres db running simply by command
 docker compose up db test_db
+
+# Note: You can run dababases with migrations from docker as below
+docker compose up db test_db db-migrations
 
 # Run migration for normal db
 diesel migration run
