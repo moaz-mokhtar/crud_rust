@@ -32,8 +32,10 @@ services:
     restart: on-failure
     depends_on:
       - db
+      - test_db
     environment:
       - DATABASE_URL=${DATABASE_URL_INTERNAL}
+      - DATABASE_URL_TEST=${DATABASE_URL_TEST_INTERNAL}
     env_file: .env
 
   server:
@@ -47,6 +49,17 @@ services:
       - db-migrations
     environment:
       - DATABASE_URL=${DATABASE_URL_INTERNAL}
+      - DATABASE_URL_TEST=${DATABASE_URL_TEST_INTERNAL}
+    env_file: .env
+  
+  test_server:
+    build: .
+    command: cargo test -- --test-threads=1
+    depends_on:
+      - test_db
+      - db-migrations
+    environment:
+      - DATABASE_URL_TEST=${DATABASE_URL_TEST_INTERNAL}
     env_file: .env
 
 volumes:

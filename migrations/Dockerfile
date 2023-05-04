@@ -13,5 +13,5 @@ RUN mv $(which diesel) /bin
 WORKDIR /db
 COPY . ./migrations/
 
-ENTRYPOINT [ "/bin/diesel" ]
-CMD ["database", "setup"]
+ENTRYPOINT [ "/bin/bash", "-c" ]
+CMD ["diesel database setup --database-url ${DATABASE_URL} && diesel database setup --database-url ${DATABASE_URL_TEST}"]
