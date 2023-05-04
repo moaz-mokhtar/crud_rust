@@ -1,16 +1,22 @@
 # crud_rust
 
 A demo project which shows sample CRUD operations with Rust.
-Model is Driver for sample drivers.
+
+## Features
+- CRUD operations for model `Driver`
+- Engine functions (dealing with db transactions) covered with unit tests
+- System seperated into modules
+- Created simple mock generator functions, check: https://github.com/moaz-mokhtar/mock-generator
+- Can run the system by docker or locally
 
 ## Technologies
 
 Technologies are as below:
 
-- Rust programming language #rust_lang
+- Server by Rust programming language #rust_lang
 - Actix web framework
 - Postgres for database
-- Diesel ORM
+- Diesel ORM for database transactions
 - REST API
 
 ## Development Guidance
@@ -115,3 +121,7 @@ curl -X GET http://localhost:8080/api/drivers/all_by_name
 curl -X GET http://localhost:8080/api/drivers/all_by_char
 
 ```
+
+
+--- 
+Developed by `Moaz in Mokhtar`
