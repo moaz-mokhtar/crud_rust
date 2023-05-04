@@ -1,7 +1,7 @@
 use crate::{
     db::DbPool,
     error::MyError,
-    models::{Driver, NewDriverRequest},
+    models::{Driver, DriverDTO, NewDriverRequest},
     schema::drivers::dsl::drivers,
 };
 use diesel::{QueryDsl, RunQueryDsl};
@@ -14,19 +14,66 @@ impl Driver {
         Ok(())
     }
 
-    pub async fn insert(incoming: NewDriverRequest, pool: &DbPool) -> Result<Driver, MyError> {
+    pub async fn insert(incoming: NewDriverRequest, pool: &DbPool) -> Result<DriverDTO, MyError> {
         let mut connection = pool.get()?;
         let feedback: Driver = diesel::insert_into(crate::schema::drivers::dsl::drivers)
             .values(&incoming.as_driver())
             .get_result(&mut connection)?;
 
+        Ok(feedback.as_dto())
+    }
+
+    pub async fn insert_bulk(incoming: Vec<Driver>, pool: &DbPool) -> Result<usize, MyError> {
+        let mut connection = pool.get()?;
+        let feedback = diesel::insert_into(crate::schema::drivers::table)
+            .values(&incoming)
+            .execute(&mut connection)?;
+
         Ok(feedback)
     }
 
-    pub async fn get_all(pool: &DbPool) -> Result<Vec<Driver>, MyError> {
+    pub async fn get_all(pool: &DbPool) -> Result<Vec<DriverDTO>, MyError> {
         let mut connection = pool.get()?;
         let drivers_list = drivers.load::<Driver>(&mut connection)?;
-        Ok(drivers_list)
+        let drivers_dto: Vec<DriverDTO> = drivers_list
+            .into_iter()
+            .map(|driver| driver.as_dto())
+            .collect();
+
+        Ok(drivers_dto)
+    }
+
+    pub async fn get_all_by_name(pool: &DbPool) -> Result<Vec<DriverDTO>, MyError> {
+        let mut connection = pool.get()?;
+        let drivers_list = drivers.load::<Driver>(&mut connection)?;
+        let mut drivers_dto: Vec<DriverDTO> = drivers_list
+            .into_iter()
+            .map(|driver| driver.as_dto())
+            .collect();
+
+        drivers_dto.sort_by(|a, b| a.name.cmp(&b.name));
+        Ok(drivers_dto)
+    }
+
+    pub async fn get_all_by_char(pool: &DbPool) -> Result<Vec<DriverDTO>, MyError> {
+        let mut connection = pool.get()?;
+        let drivers_list = drivers.load::<Driver>(&mut connection)?;
+
+        let alphabetized_drivers: Vec<DriverDTO> = drivers_list
+            .into_iter()
+            .map(|driver| {
+                let driver = Driver {
+                    id: driver.id,
+                    first_name: sort_name_by_char(driver.first_name),
+                    last_name: sort_name_by_char(driver.last_name),
+                    email: driver.email,
+                    phone: driver.phone,
+                };
+                driver.as_dto()
+            })
+            .collect();
+
+        Ok(alphabetized_drivers)
     }
 
     pub async fn get_by_id(id: Uuid, pool: &DbPool) -> Result<Driver, MyError> {
@@ -48,4 +95,9 @@ impl Driver {
             });
         }
     }
+}
+
+pub fn sort_name_by_char(name: String) -> String {
+    let chars: std::collections::BTreeSet<char> = name.chars().collect();
+    chars.into_iter().collect()
 }

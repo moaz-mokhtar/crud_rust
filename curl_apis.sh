@@ -22,10 +22,29 @@ curl -X POST \
     http://localhost:$PORT/api/drivers
 
 
+echo "\n\n==========================="
+echo "Get all drivers"
+curl -X GET http://localhost:$PORT/api/drivers
+
+
+echo "\n\n==========================="
+echo "Create 100 drivers"
+curl -X GET http://localhost:$PORT/api/drivers/rand100
+
 
 echo "\n\n==========================="
 echo "Get all drivers"
 curl -X GET http://localhost:$PORT/api/drivers
+
+
+echo "\n\n==========================="
+echo "Get all drivers sorted 'name'"
+curl -X GET http://localhost:$PORT/api/drivers/all_by_name
+
+
+echo "\n\n==========================="
+echo "Get all drivers which names are sorted by characters"
+curl -X GET http://localhost:$PORT/api/drivers/all_by_char
 
 
 # Uncomment below after add valid driver_uuid

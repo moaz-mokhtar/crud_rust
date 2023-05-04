@@ -9,7 +9,9 @@ pub struct DefaultResponse {
     pub description: String,
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Queryable, PartialEq, Insertable)]
+#[derive(
+    Debug, Clone, Deserialize, Serialize, Queryable, PartialEq, Insertable, PartialOrd, Eq, Ord,
+)]
 #[diesel(table_name = drivers)]
 pub struct Driver {
     pub id: Uuid,
@@ -19,6 +21,13 @@ pub struct Driver {
     pub phone: String,
 }
 
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, PartialOrd, Eq, Ord)]
+pub struct DriverDTO {
+    pub id: Uuid,
+    pub name: String,
+    pub email: String,
+    pub phone: String,
+}
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NewDriverRequest {
     pub first_name: String,
@@ -33,6 +42,17 @@ impl NewDriverRequest {
             id: Uuid::new_v4(),
             first_name: self.first_name.clone(),
             last_name: self.last_name.clone(),
+            email: self.email.clone(),
+            phone: self.phone.clone(),
+        }
+    }
+}
+
+impl Driver {
+    pub fn as_dto(&self) -> DriverDTO {
+        DriverDTO {
+            id: self.id,
+            name: format!("{} {}", self.first_name, self.last_name),
             email: self.email.clone(),
             phone: self.phone.clone(),
         }
