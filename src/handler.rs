@@ -20,7 +20,7 @@ pub fn routes_config(config: &mut ServiceConfig) {
                     .route("", web::get().to(get_all))
                     .route("/{driverid}", web::get().to(get_driver))
                     .route("/{driverid}", web::delete().to(delete_driver))
-                    .route("/rand100", web::get().to(new_100_driver))
+                    .route("/rand100/", web::get().to(new_100_driver))
                     .route("/all_by_name/", web::get().to(get_all_by_name))
                     .route("/all_by_char/", web::get().to(get_all_by_char)),
             ),
